@@ -1,1 +1,1 @@
-# haskell-boys
+# hs-boys
