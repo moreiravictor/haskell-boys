@@ -3,47 +3,45 @@ module Main (main) where
 import Data.Maybe
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
-import Graphics.Gloss.Juicy (loadJuicyPNG)
-
-data World = World
-  {  background :: Picture,
-     sprite :: Picture,
-     position :: (Float, Float)
-  }
-
-loadImg :: Maybe Picture -> Picture
-loadImg (Just pic) = pic
-loadImg Nothing = blank
+import Models
+import Physics
+import Sprites
 
 main :: IO ()
 main = do
-  maybeMainCharacter <- loadJuicyPNG "assets/homelander.png"
-  maybeBg <- loadJuicyPNG "assets/bg.png"
 
-  let mainCharacter = loadImg maybeMainCharacter
-  let bg = loadImg maybeBg
+  sprites <- loadSprites
 
-  -- Inicializa o mundo com o sprite carregado
-  let initialWorld = World bg mainCharacter
+  let mainCharacter = Homelander (homelander sprites) (0,0)
 
-  -- Inicia o jogo
+  let initialWorld = World (background sprites) mainCharacter []
+
   play
     (InWindow "Haskell Boys" (1280, 720) (0, 0)) -- Janela do jogo
     white                                         -- Cor de fundo
     60                                           -- FPS
-    initialWorld                                 -- Estado inicial do mundo
-    drawWorld                                    -- Função de desenho
-    handleInput                                  -- Função de processamento de eventos
-    updateWorld                                  -- Função de atualização do mundo
+    initialWorld
+    drawWorld
+    handleInput
+    updateWorld
 
--- Função de desenho do mundo
 drawWorld :: World -> Picture
-drawWorld world = pictures [background world, translate 0 0 (sprite world)]
+drawWorld world =
+  let bg = backgroundSprite world
+      (x, y) = position (mainCharacter world)
+      charSprite = sprite (mainCharacter world)
+  in pictures [bg, translate x y charSprite]
 
--- Função para lidar com eventos de entrada (neste caso, não faz nada)
-handleInput :: Event -> World -> World
-handleInput _ world = world
-
--- Função de atualização do mundo (neste caso, não faz nada)
 updateWorld :: Float -> World -> World
-updateWorld _ world = world
+updateWorld _ world =
+  let (x, y) = getHomelanderPosition world
+      keys = getPressedKeys world
+      x'
+        | SpecialKey KeyLeft `elem` keys = x - 10
+        | SpecialKey KeyRight `elem` keys = x + 10
+        | otherwise = x
+      y'
+        | SpecialKey KeyUp `elem` keys = y + 10
+        | SpecialKey KeyDown `elem` keys = y - 10
+        | otherwise = y
+  in setHomelanderPosition (x', y') world
