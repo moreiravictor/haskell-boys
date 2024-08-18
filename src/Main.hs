@@ -10,7 +10,7 @@ main :: IO ()
 main = do
 
   sprites <- loadSprites
-  enemies <- generateEnemies sprites 20
+  enemies <- generateEnemies sprites 10
 
   let mainCharacter = Homelander (homelander sprites) (0,0) 0 (-1)
 
