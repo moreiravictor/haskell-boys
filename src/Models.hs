@@ -6,17 +6,34 @@ import Graphics.Gloss.Interface.Pure.Game
 data Homelander = Homelander
   {
     sprite        :: Picture,
-    position      :: (Float, Float)
+    position      :: (Float, Float),
+    rotation      :: Float,
+    direction     :: Float
   }
+
+data Enemy = Enemy
+  {
+    enemySprite        :: Picture,
+    enemyPosition      :: (Float, Float),
+    enemyDirection     :: Float
+  }
+
+-- generateEnemy :: IO Enemy
+
 
 data World = World
   {  backgroundSprite :: Picture,
-     mainCharacter :: Homelander,
-     pressedKeys   :: [Key]
+     mainCharacter    :: Homelander,
+     pressedKeys      :: [Key],
+     enemies          :: [Enemy]
   }
 
-getHomelanderPosition :: World -> (Float, Float)
-getHomelanderPosition world = position (mainCharacter world)
+getHomelanderPosition :: World -> (Float, Float, Float, Float)
+getHomelanderPosition world =
+  let (x, y) = position (mainCharacter world)
+      angle = rotation (mainCharacter world)
+      direction' = direction (mainCharacter world)
+  in (x, y, angle, direction')
 
 setHomelanderPosition :: (Float, Float) -> World -> World
 setHomelanderPosition newPos world =
