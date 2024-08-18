@@ -5,16 +5,16 @@ import Graphics.Gloss.Interface.Pure.Game
 import Models
 import Physics
 import Sprites
-import System.Random (randomRIO)
 
 main :: IO ()
 main = do
 
   sprites <- loadSprites
+  enemies <- generateEnemies sprites 20
 
   let mainCharacter = Homelander (homelander sprites) (0,0) 0 (-1)
 
-  let initialWorld = World (background sprites) mainCharacter [] []
+  let initialWorld = World (background sprites) mainCharacter [] enemies
 
   play
     (InWindow "Haskell Boys" (1600, 900) (0, 0)) -- Janela do jogo
@@ -33,7 +33,8 @@ drawWorld world =
       orientation = direction (mainCharacter world)
       rotatedSprite = rotate (rotation (mainCharacter world)) charSprite
       scaledSprite = scale orientation 1 rotatedSprite
-  in pictures [bg, translate x y scaledSprite]
+      enemiesPics = map (\enemy -> uncurry translate (ePosition enemy) (eSprite enemy)) (enemies world)
+  in pictures (bg : translate x y scaledSprite : enemiesPics)
 
 updateWorld :: Float -> World -> World
 updateWorld _ world =

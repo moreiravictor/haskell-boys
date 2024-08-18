@@ -2,6 +2,8 @@ module Models where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
+import System.Random (randomRIO)
+import Sprites
 
 data Homelander = Homelander
   {
@@ -13,13 +15,21 @@ data Homelander = Homelander
 
 data Enemy = Enemy
   {
-    enemySprite        :: Picture,
-    enemyPosition      :: (Float, Float),
-    enemyDirection     :: Float
+    eSprite        :: Picture,
+    ePosition      :: (Float, Float),
+    eDirection     :: Float
   }
 
--- generateEnemy :: IO Enemy
-
+generateEnemies :: GameSprites -> Int -> IO [Enemy]
+generateEnemies sprites n = mapM (const generateEnemy) [1..n]
+  where
+    generateEnemy = do
+      let spritesArr = getAllSprites sprites
+      randomSpriteIndex <- randomRIO (0, length spritesArr - 1)
+      let sprite' = spritesArr !! randomSpriteIndex
+      x <- randomRIO (-750, 750)
+      y <- randomRIO (-410, 410)
+      return $ Enemy sprite' (x, y) 1
 
 data World = World
   {  backgroundSprite :: Picture,

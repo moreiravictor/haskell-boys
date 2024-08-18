@@ -15,6 +15,16 @@ data GameSprites = GameSprites
     translucent :: Picture
   }
 
+getAllSprites :: GameSprites -> [Picture]
+getAllSprites sprites =
+  [ aTrain sprites
+  , blackNoir sprites
+  , maeve sprites
+  , starlight sprites
+  , theDeep sprites
+  , translucent sprites
+  ]
+
 loadImg :: Maybe Picture -> Picture
 loadImg (Just pic) = pic
 loadImg Nothing = blank
