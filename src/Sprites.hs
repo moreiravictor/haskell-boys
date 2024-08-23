@@ -12,7 +12,8 @@ data GameSprites = GameSprites
     maeve :: Picture,
     starlight :: Picture,
     theDeep :: Picture,
-    translucent :: Picture
+    translucent :: Picture,
+    laser :: Picture
   }
 
 getAllSprites :: GameSprites -> [Picture]
@@ -39,6 +40,7 @@ loadSprites = do
   maybeStarlight <- loadJuicyPNG "assets/starlight.png"
   maybeTheDeep <- loadJuicyPNG "assets/theDeep.png"
   maybeTranslucent <- loadJuicyPNG "assets/translucent.png"
+  maybeLaser <- loadJuicyPNG "assets/laser.png"
 
   let mainCharacterImg = scale 3 3 (loadImg maybeMainCharacter)
   let aTrainImg = scale 3 3 (loadImg maybeAtrain)
@@ -47,6 +49,7 @@ loadSprites = do
   let starlightImg = scale 3 3 (loadImg maybeStarlight)
   let theDeepImg = scale 3 3 (loadImg maybeTheDeep)
   let translucentImg = scale 3 3 (loadImg maybeTranslucent)
+  let laserImg = scale 2 2 (loadImg maybeLaser)
   let bg = loadImg maybeBg
 
   return GameSprites
@@ -58,5 +61,6 @@ loadSprites = do
       maeve = maeveImg,
       starlight = starlightImg,
       theDeep = theDeepImg,
-      translucent = translucentImg
+      translucent = translucentImg,
+      laser = laserImg
     }

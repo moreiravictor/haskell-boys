@@ -5,16 +5,17 @@ import Graphics.Gloss.Interface.Pure.Game
 import Models
 import Physics
 import Sprites
+import Data.Maybe (isJust, fromJust)
 
 main :: IO ()
 main = do
 
   sprites <- loadSprites
-  enemies <- generateEnemies sprites 10
+  initialEnemies <- generateEnemies sprites 10
 
-  let mainCharacter = Homelander (homelander sprites) (0,0) 0 (-1)
+  let mainChar = Homelander (homelander sprites) (0,0) 0 (-1)
 
-  let initialWorld = World (background sprites) mainCharacter [] enemies
+  let initialWorld = World (background sprites) (laser sprites) mainChar [] initialEnemies []
 
   play
     (InWindow "Haskell Boys" (1600, 900) (0, 0)) -- Janela do jogo
@@ -34,12 +35,14 @@ drawWorld world =
       rotatedSprite = rotate (rotation (mainCharacter world)) charSprite
       scaledSprite = scale orientation 1 rotatedSprite
       enemiesPics = map (\enemy -> uncurry translate (ePosition enemy) (eSprite enemy)) (enemies world)
-  in pictures (bg : translate x y scaledSprite : enemiesPics)
+      laserPics = map (\laser -> uncurry translate (pPosition laser) (pSprite laser)) (projectiles world)
+  in pictures (bg : translate x y scaledSprite : enemiesPics ++ laserPics)
 
 updateWorld :: Float -> World -> World
 updateWorld _ world =
   let (x, y, angle, direction) = getHomelanderPosition world
       keys = getPressedKeys world
+      currentProjectiles = projectiles world
       x'
         | Char 'a' `elem` keys = max (x - 10) (-750)
         | Char 'd' `elem` keys = min (x + 10) 750
@@ -52,4 +55,11 @@ updateWorld _ world =
         | Char 'a' `elem` keys && direction == -1 = 1
         | Char 'd' `elem` keys && direction == 1 = -1
         | otherwise = direction
-  in world { mainCharacter = (mainCharacter world) { position = (x', y'), rotation = angle, direction = direction' } }
+      projectile' :: Maybe Projectile
+      projectile'
+        | MouseButton LeftButton `elem` keys = Just Projectile { pSprite = laserSprite world, pPosition = (x'+30, y'+30), pDirection = 1  }
+        | otherwise = Nothing
+  in world {
+    mainCharacter = (mainCharacter world) { position = (x', y'), rotation = angle, direction = direction' },
+    projectiles = currentProjectiles ++ [fromJust projectile' | isJust projectile']
+  }

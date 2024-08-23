@@ -7,7 +7,8 @@ handleInput :: Event -> World -> World
 handleInput (EventKey (Char key) Down _ _) world = addPressedKey (Char key) world
 handleInput (EventKey (Char key) Up _ _) world = removePressedKey (Char key) world
 handleInput (EventMotion mousePos) world = updateRotationWithMouse mousePos world
-handleInput (EventKey (MouseButton LeftButton) Down _ mousePos) world = updateRotationWithMouse mousePos world
+handleInput (EventKey (MouseButton LeftButton) Down _ _) world = addPressedKey  (MouseButton LeftButton) world
+handleInput (EventKey (MouseButton LeftButton) Up _ _) world = removePressedKey  (MouseButton LeftButton) world
 handleInput _ world = world
 
 updateRotationWithMouse :: (Float, Float) -> World -> World

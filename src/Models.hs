@@ -13,6 +13,13 @@ data Homelander = Homelander
     direction     :: Float
   }
 
+data Projectile = Projectile
+  {
+    pSprite        :: Picture,
+    pPosition      :: (Float, Float),
+    pDirection     :: Float
+  }
+
 data Enemy = Enemy
   {
     eSprite        :: Picture,
@@ -24,7 +31,7 @@ generateEnemies :: GameSprites -> Int -> IO [Enemy]
 generateEnemies sprites n = mapM (const generateEnemy) [1..n]
   where
     generateEnemy = do
-      let spritesArr = getAllSprites sprites
+      let spritesArr   = getAllSprites sprites
       randomSpriteIndex <- randomRIO (0, length spritesArr - 1)
       let sprite' = spritesArr !! randomSpriteIndex
       x <- randomRIO (-750, 750)
@@ -33,9 +40,11 @@ generateEnemies sprites n = mapM (const generateEnemy) [1..n]
 
 data World = World
   {  backgroundSprite :: Picture,
+     laserSprite      :: Picture,
      mainCharacter    :: Homelander,
      pressedKeys      :: [Key],
-     enemies          :: [Enemy]
+     enemies          :: [Enemy],
+     projectiles      :: [Projectile]
   }
 
 getHomelanderPosition :: World -> (Float, Float, Float, Float)
