@@ -17,8 +17,9 @@ data Projectile = Projectile
   {
     pSprite        :: Picture,
     pPosition      :: (Float, Float),
+    pRotation       :: Float,
     pDirection     :: Float
-  }
+  } deriving Eq
 
 data Enemy = Enemy
   {
@@ -46,6 +47,9 @@ data World = World
      enemies          :: [Enemy],
      projectiles      :: [Projectile]
   }
+
+getProjectiles :: World -> [Projectile]
+getProjectiles = projectiles
 
 getHomelanderPosition :: World -> (Float, Float, Float, Float)
 getHomelanderPosition world =

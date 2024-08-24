@@ -57,9 +57,28 @@ updateWorld _ world =
         | otherwise = direction
       projectile' :: Maybe Projectile
       projectile'
-        | MouseButton LeftButton `elem` keys = Just Projectile { pSprite = laserSprite world, pPosition = (x'+30, y'+30), pDirection = 1  }
+        | MouseButton LeftButton `elem` keys = Just Projectile { pSprite = laserSprite world, pPosition = (x', y'), pDirection = direction', pRotation = angle  }
         | otherwise = Nothing
   in world {
     mainCharacter = (mainCharacter world) { position = (x', y'), rotation = angle, direction = direction' },
-    projectiles = currentProjectiles ++ [fromJust projectile' | isJust projectile']
+    projectiles = updateLasers currentProjectiles ++ [fromJust projectile' | isJust projectile']
   }
+
+updateLasers :: [Projectile] -> [Projectile]
+updateLasers = removeMissedLasers . map walk
+  where
+    walk projectile' =
+        let
+            speed = 10
+            normalizedAngle = if pDirection projectile' == -1 then pRotation projectile' + 20 else - pRotation projectile' - 360
+            radianAngle = normalizedAngle * pi / 180  -- Convert rotation angle to radians
+            velX = speed * cos radianAngle * (- pDirection projectile')
+            velY = speed * sin radianAngle * (- pDirection projectile')
+            (x, y) = pPosition projectile'
+        in projectile' {pPosition = (x + velX, y + velY)}
+    removeMissedLasers :: [Projectile] -> [Projectile]
+    removeMissedLasers = filter isVisible
+      where
+        isVisible projectile' =
+          let (x, y) = pPosition projectile'
+          in x >= -850 && x <= 850 && y >= -470 && y <= 470

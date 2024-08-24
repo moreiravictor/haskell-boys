@@ -49,7 +49,7 @@ loadSprites = do
   let starlightImg = scale 3 3 (loadImg maybeStarlight)
   let theDeepImg = scale 3 3 (loadImg maybeTheDeep)
   let translucentImg = scale 3 3 (loadImg maybeTranslucent)
-  let laserImg = scale 2 2 (loadImg maybeLaser)
+  let laserImg = scale 1.5 1.5 (loadImg maybeLaser)
   let bg = loadImg maybeBg
 
   return GameSprites
