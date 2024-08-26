@@ -19,3 +19,22 @@ updateRotationWithMouse (mouseX, mouseY) world =
       angle = atan2 deltaY deltaX * 180 / pi  -- Convert from radians to degrees
       normalizedAngle = if direction == -1 then angle-20 else - (angle + 180)
   in world { mainCharacter = (mainCharacter world) { rotation = normalizedAngle } }
+
+updateLasers :: [Projectile] -> [Projectile]
+updateLasers = removeMissedLasers . map walk
+  where
+    walk projectile' =
+        let
+            speed = 10
+            normalizedAngle = if pDirection projectile' == -1 then pRotation projectile' + 20 else - pRotation projectile' - 360
+            radianAngle = normalizedAngle * pi / 180  -- Convert rotation angle to radians
+            velX = speed * cos radianAngle * (- pDirection projectile')
+            velY = speed * sin radianAngle * (- pDirection projectile')
+            (x, y) = pPosition projectile'
+        in projectile' {pPosition = (x + velX, y + velY)}
+    removeMissedLasers :: [Projectile] -> [Projectile]
+    removeMissedLasers = filter isVisible
+      where
+        isVisible projectile' =
+          let (x, y) = pPosition projectile'
+          in x >= -850 && x <= 850 && y >= -470 && y <= 470

@@ -5,7 +5,9 @@ import Graphics.Gloss.Interface.Pure.Game
 import Models
 import Physics
 import Sprites
+import Render
 import Data.Maybe (isJust, fromJust)
+import Data.Bifunctor
 
 main :: IO ()
 main = do
@@ -18,7 +20,7 @@ main = do
   let initialWorld = World (background sprites) (laser sprites) mainChar [] initialEnemies []
 
   play
-    (InWindow "Haskell Boys" (1600, 900) (0, 0)) -- Janela do jogo
+    (InWindow "Haskell Boys" (bimap round round screenSize) (5000, 600)) -- Janela do jogo
     white                                         -- Cor de fundo
     60                                           -- FPS
     initialWorld
@@ -28,15 +30,11 @@ main = do
 
 drawWorld :: World -> Picture
 drawWorld world =
-  let bg = backgroundSprite world
-      (x, y) = position (mainCharacter world)
-      charSprite = sprite (mainCharacter world)
-      orientation = direction (mainCharacter world)
-      rotatedSprite = rotate (rotation (mainCharacter world)) charSprite
-      scaledSprite = scale orientation 1 rotatedSprite
-      enemiesPics = map (\enemy -> uncurry translate (ePosition enemy) (eSprite enemy)) (enemies world)
-      laserPics = map (\laser -> uncurry translate (pPosition laser) (pSprite laser)) (projectiles world)
-  in pictures (bg : translate x y scaledSprite : enemiesPics ++ laserPics)
+  let backgroundPic = backgroundSprite world
+      homelanderPic = drawHomelander world
+      enemiesPics = drawEnemies world
+      laserPics = drawLasers world
+  in pictures (backgroundPic : homelanderPic : enemiesPics ++ laserPics)
 
 updateWorld :: Float -> World -> World
 updateWorld _ world =
@@ -44,12 +42,12 @@ updateWorld _ world =
       keys = getPressedKeys world
       currentProjectiles = projectiles world
       x'
-        | Char 'a' `elem` keys = max (x - 10) (-750)
-        | Char 'd' `elem` keys = min (x + 10) 750
+        | Char 'a' `elem` keys = max (x - 10) (- fst screenSize)
+        | Char 'd' `elem` keys = min (x + 10) (fst screenSize)
         | otherwise = x
       y'
-        | Char 'w' `elem` keys = min (y + 10) 410
-        | Char 's' `elem` keys = max (y - 10) (-410)
+        | Char 'w' `elem` keys = min (y + 10) (snd screenSize)
+        | Char 's' `elem` keys = max (y - 10) (- snd screenSize)
         | otherwise = y
       direction'
         | Char 'a' `elem` keys && direction == -1 = 1
@@ -63,22 +61,3 @@ updateWorld _ world =
     mainCharacter = (mainCharacter world) { position = (x', y'), rotation = angle, direction = direction' },
     projectiles = updateLasers currentProjectiles ++ [fromJust projectile' | isJust projectile']
   }
-
-updateLasers :: [Projectile] -> [Projectile]
-updateLasers = removeMissedLasers . map walk
-  where
-    walk projectile' =
-        let
-            speed = 10
-            normalizedAngle = if pDirection projectile' == -1 then pRotation projectile' + 20 else - pRotation projectile' - 360
-            radianAngle = normalizedAngle * pi / 180  -- Convert rotation angle to radians
-            velX = speed * cos radianAngle * (- pDirection projectile')
-            velY = speed * sin radianAngle * (- pDirection projectile')
-            (x, y) = pPosition projectile'
-        in projectile' {pPosition = (x + velX, y + velY)}
-    removeMissedLasers :: [Projectile] -> [Projectile]
-    removeMissedLasers = filter isVisible
-      where
-        isVisible projectile' =
-          let (x, y) = pPosition projectile'
-          in x >= -850 && x <= 850 && y >= -470 && y <= 470
