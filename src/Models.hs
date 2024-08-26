@@ -8,6 +8,9 @@ import Sprites
 screenSize :: (Float, Float)
 screenSize = (1600, 900)
 
+screenPosition :: (Int, Int)
+screenPosition = (5000, 600)
+
 data Homelander = Homelander
   {
     sprite        :: Picture,
@@ -28,7 +31,8 @@ data Enemy = Enemy
   {
     eSprite        :: Picture,
     ePosition      :: (Float, Float),
-    eDirection     :: Float
+    eDirection     :: Float,
+    eInitialBorder :: Int
   }
 
 generateEnemies :: GameSprites -> Int -> IO [Enemy]
@@ -58,16 +62,18 @@ generateEnemies sprites n = mapM (const generateEnemy) [1..n]
           yPos <- randomRIO (-halfHeight, halfHeight)
           return (halfWidth + 100, yPos)  -- Slightly outside the right
 
-      return $ Enemy sprite' (x, y) 1
+      return $ Enemy sprite' (x, y) 1 borderSide
 
 data World = World
-  {  backgroundSprite :: Picture,
-     laserSprite      :: Picture,
+  {  gameSprites      :: GameSprites,
      mainCharacter    :: Homelander,
      pressedKeys      :: [Key],
      enemies          :: [Enemy],
      projectiles      :: [Projectile]
   }
+
+getEnemies :: World -> [Enemy]
+getEnemies = enemies
 
 getProjectiles :: World -> [Projectile]
 getProjectiles = projectiles

@@ -7,7 +7,7 @@ import Physics
 import Sprites
 import Render
 import Data.Maybe (isJust, fromJust)
-import Data.Bifunctor
+import Data.Bifunctor (Bifunctor(bimap))
 
 main :: IO ()
 main = do
@@ -17,10 +17,10 @@ main = do
 
   let mainChar = Homelander (homelander sprites) (0,0) 0 (-1)
 
-  let initialWorld = World (background sprites) (laser sprites) mainChar [] initialEnemies []
+  let initialWorld = World sprites mainChar [] initialEnemies []
 
   play
-    (InWindow "Haskell Boys" (bimap round round screenSize) (5000, 600)) -- Janela do jogo
+    (InWindow "Haskell Boys" (bimap round round screenSize) screenPosition) -- Janela do jogo
     white                                         -- Cor de fundo
     60                                           -- FPS
     initialWorld
@@ -30,7 +30,7 @@ main = do
 
 drawWorld :: World -> Picture
 drawWorld world =
-  let backgroundPic = backgroundSprite world
+  let backgroundPic = background (gameSprites world)
       homelanderPic = drawHomelander world
       enemiesPics = drawEnemies world
       laserPics = drawLasers world
@@ -41,23 +41,26 @@ updateWorld _ world =
   let (x, y, angle, direction) = getHomelanderPosition world
       keys = getPressedKeys world
       currentProjectiles = projectiles world
+      enemies' = getEnemies world
+      (screenWidth, screenHeight) = screenSize
       x'
-        | Char 'a' `elem` keys = max (x - 10) (- fst screenSize)
-        | Char 'd' `elem` keys = min (x + 10) (fst screenSize)
+        | Char 'a' `elem` keys || Char 'A' `elem` keys = max (x - 10) (- (screenWidth/2))
+        | Char 'd' `elem` keys || Char 'D' `elem` keys = min (x + 10) (screenWidth/2)
         | otherwise = x
       y'
-        | Char 'w' `elem` keys = min (y + 10) (snd screenSize)
-        | Char 's' `elem` keys = max (y - 10) (- snd screenSize)
+        | Char 'w' `elem` keys || Char 'W' `elem` keys = min (y + 10) (screenHeight/2)
+        | Char 's' `elem` keys || Char 'S' `elem` keys = max (y - 10) (- (screenHeight/2))
         | otherwise = y
       direction'
-        | Char 'a' `elem` keys && direction == -1 = 1
-        | Char 'd' `elem` keys && direction == 1 = -1
+        | (Char 'a' `elem` keys || Char 'A' `elem` keys) && direction == -1 = 1
+        | (Char 'd' `elem` keys || Char 'D' `elem` keys) && direction == 1 = -1
         | otherwise = direction
       projectile' :: Maybe Projectile
       projectile'
-        | MouseButton LeftButton `elem` keys = Just Projectile { pSprite = laserSprite world, pPosition = (x', y'), pDirection = direction', pRotation = angle  }
+        | MouseButton LeftButton `elem` keys = Just Projectile { pSprite = laser (gameSprites world), pPosition = (x', y'), pDirection = direction', pRotation = angle  }
         | otherwise = Nothing
   in world {
     mainCharacter = (mainCharacter world) { position = (x', y'), rotation = angle, direction = direction' },
-    projectiles = updateLasers currentProjectiles ++ [fromJust projectile' | isJust projectile']
+    projectiles = updateLasers currentProjectiles ++ [fromJust projectile' | isJust projectile'],
+    enemies = updateEnemies enemies' (gameSprites world)
   }
