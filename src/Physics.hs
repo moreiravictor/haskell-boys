@@ -38,3 +38,12 @@ updateLasers = removeMissedLasers . map walk
         isVisible projectile' =
           let (x, y) = pPosition projectile'
           in x >= -850 && x <= 850 && y >= -470 && y <= 470
+
+removeCollidedEnemies :: [Projectile] -> [Enemy] -> [Enemy]
+removeCollidedEnemies projectiles' = filter (\enemy -> not (any (`collides` enemy) projectiles'))
+  where collides projectile enemy =
+          let (px, py) = pPosition projectile
+              (ex, ey) = ePosition enemy
+              size = 40
+          in abs (px - ex) < size && abs (py - ey) < size
+

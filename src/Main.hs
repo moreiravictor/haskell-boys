@@ -59,8 +59,9 @@ updateWorld _ world =
       projectile'
         | MouseButton LeftButton `elem` keys = Just Projectile { pSprite = laser (gameSprites world), pPosition = (x', y'), pDirection = direction', pRotation = angle  }
         | otherwise = Nothing
+      updatedEnemies = removeCollidedEnemies currentProjectiles enemies'
   in world {
     mainCharacter = (mainCharacter world) { position = (x', y'), rotation = angle, direction = direction' },
     projectiles = updateLasers currentProjectiles ++ [fromJust projectile' | isJust projectile'],
-    enemies = updateEnemies enemies' (gameSprites world)
+    enemies = updateEnemies updatedEnemies (gameSprites world)
   }
