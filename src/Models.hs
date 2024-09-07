@@ -67,6 +67,7 @@ generateEnemies sprites n = mapM (const generateEnemy) [1..n]
 data World = World
   {
      gameState        :: GameState,
+     time             :: Float,
      gameSprites      :: GameSprites,
      mainCharacter    :: Homelander,
      pressedKeys      :: [Key],

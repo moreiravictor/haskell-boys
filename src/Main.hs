@@ -13,11 +13,10 @@ main :: IO ()
 main = do
 
   sprites <- loadSprites
-  initialEnemies <- generateEnemies sprites 10
 
   let mainChar = Homelander (homelander sprites) (0,0) 0 (-1)
 
-  let initialWorld = World Menu sprites mainChar [] initialEnemies []
+  let initialWorld = World Menu 0 sprites mainChar [] [] []
 
   play
     (InWindow "Haskell Boys" (bimap round round screenSize) screenPosition) -- Janela do jogo
@@ -37,9 +36,13 @@ drawWorld world =
 
 drawMenu :: World -> Picture
 drawMenu world =
-  let logo' = logo (gameSprites world)
-      bg = background (gameSprites world)
-  in pictures(bg : [translate 0 0 logo'])
+  let
+      logoVerticalOffset = 5 * sin (4 * time world)
+      logo' = translate 0 (100 + logoVerticalOffset) $ logo (gameSprites world)
+      scaleFactor = 0.6 + 0.2 * sin (2.5 * time world)
+      start' = translate (-20) (-220) $ scale scaleFactor scaleFactor $ start (gameSprites world)
+      bg = menuBackground (gameSprites world)
+  in pictures [bg, logo', start']
 
 drawGameOver :: Picture
 drawGameOver = translate (-300) 0 $ scale 0.3 0.3 $ text "GAME OVER!"
@@ -53,7 +56,16 @@ drawPlayingWorld world =
   in pictures (backgroundPic : homelanderPic : enemiesPics ++ laserPics)
 
 updateWorld :: Float -> World -> World
-updateWorld _ world =
+updateWorld dt world = case gameState world of
+            Playing -> updatePlayingWorld world
+            Menu -> updateMenuWorld dt world
+            GameOver -> updatePlayingWorld world
+
+updateMenuWorld :: Float -> World -> World
+updateMenuWorld dt world = world { time = time world + dt }
+
+updatePlayingWorld :: World -> World
+updatePlayingWorld world =
   let (x, y, angle, direction) = getHomelanderPosition world
       keys = getPressedKeys world
       currentProjectiles = projectiles world
