@@ -17,7 +17,7 @@ main = do
 
   let mainChar = Homelander (homelander sprites) (0,0) 0 (-1)
 
-  let initialWorld = World sprites mainChar [] initialEnemies []
+  let initialWorld = World Menu sprites mainChar [] initialEnemies []
 
   play
     (InWindow "Haskell Boys" (bimap round round screenSize) screenPosition) -- Janela do jogo
@@ -30,6 +30,22 @@ main = do
 
 drawWorld :: World -> Picture
 drawWorld world =
+  case gameState world of
+    Menu      -> drawMenu world
+    Playing   -> drawPlayingWorld world
+    GameOver  -> drawGameOver
+
+drawMenu :: World -> Picture
+drawMenu world =
+  let logo' = logo (gameSprites world)
+      bg = background (gameSprites world)
+  in pictures(bg : [translate 0 0 logo'])
+
+drawGameOver :: Picture
+drawGameOver = translate (-300) 0 $ scale 0.3 0.3 $ text "GAME OVER!"
+
+drawPlayingWorld :: World -> Picture
+drawPlayingWorld world =
   let backgroundPic = background (gameSprites world)
       homelanderPic = drawHomelander world
       enemiesPics = drawEnemies world

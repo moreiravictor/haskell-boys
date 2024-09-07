@@ -65,7 +65,9 @@ generateEnemies sprites n = mapM (const generateEnemy) [1..n]
       return $ Enemy sprite' (x, y) 1 borderSide
 
 data World = World
-  {  gameSprites      :: GameSprites,
+  {
+     gameState        :: GameState,
+     gameSprites      :: GameSprites,
      mainCharacter    :: Homelander,
      pressedKeys      :: [Key],
      enemies          :: [Enemy],
@@ -99,3 +101,5 @@ removePressedKey key world = world { pressedKeys = filter (/= key) (pressedKeys 
 
 getPressedKeys :: World -> [Key]
 getPressedKeys = pressedKeys
+
+data GameState = Menu | Playing | GameOver

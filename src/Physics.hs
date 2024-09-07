@@ -9,6 +9,10 @@ handleInput (EventKey (Char key) Up _ _) world = removePressedKey (Char key) wor
 handleInput (EventMotion mousePos) world = updateRotationWithMouse mousePos world
 handleInput (EventKey (MouseButton LeftButton) Down _ _) world = addPressedKey  (MouseButton LeftButton) world
 handleInput (EventKey (MouseButton LeftButton) Up _ _) world = removePressedKey  (MouseButton LeftButton) world
+handleInput (EventKey (SpecialKey KeyEnter) Down _ _) world =
+  case gameState world of
+    Menu -> world { gameState = Playing }
+    GameOver -> world { gameState = Menu, enemies = [], projectiles = [] }
 handleInput _ world = world
 
 updateRotationWithMouse :: (Float, Float) -> World -> World
