@@ -43,19 +43,20 @@ updateLasers = removeMissedLasers . map walk
           let (x, y) = pPosition projectile'
           in x >= -850 && x <= 850 && y >= -470 && y <= 470
 
-removeCollidedEnemies :: [Projectile] -> [Enemy] -> [Enemy]
-removeCollidedEnemies projectiles' = filter (\enemy -> not (any (`collides` enemy) projectiles'))
-  where collides projectile enemy =
-          let (px, py) = pPosition projectile
-              (ex, ey) = ePosition enemy
-              size = 40
-          in abs (px - ex) < size && abs (py - ey) < size
-
-updateLifeOnCollision :: Int -> Homelander -> [Enemy] -> Int
-updateLifeOnCollision lf main enemies' = if any (collides main) enemies' then lf - 1 else lf
-  where collides main' enemy =
-          let (mx, my) = position main'
-              (ex, ey) = ePosition enemy
-              size = 40
-          in abs (mx - ex) < size && abs (my - ey) < size
-
+handleCollisions :: Int -> Homelander -> [Projectile] -> [Enemy] -> (Int, [Enemy])
+handleCollisions life' homelander' projectiles' = foldr checkCollision (life', [])
+  where
+    laserCollides projectile enemy =
+      let (px, py) = pPosition projectile
+          (ex, ey) = ePosition enemy
+          size = 40
+      in abs (px - ex) < size && abs (py - ey) < size
+    homelanderCollides homelander enemy =
+      let (hx, hy) = position homelander
+          (ex, ey) = ePosition enemy
+          size = 80
+      in abs (hx - ex) < size && abs (hy - ey) < size
+    checkCollision enemy (life'', remainingEnemies)
+      | any (`laserCollides` enemy) projectiles' = (life'', remainingEnemies)
+      | homelanderCollides homelander' enemy = (life'' - 1, remainingEnemies)
+      | otherwise = (life'', enemy : remainingEnemies)

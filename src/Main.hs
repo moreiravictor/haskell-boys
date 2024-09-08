@@ -14,7 +14,7 @@ main = do
 
   sprites <- loadSprites
 
-  let mainChar = Homelander (homelander sprites) (0,0) 0 (-1)
+  let mainChar = Homelander (homelander sprites) (0,0) 0 (-1) (False, 0)
 
   let initialWorld = World Menu initialStats 0 sprites mainChar [] [] []
 
@@ -69,11 +69,12 @@ updateMenuWorld dt world = world { time = time world + dt }
 
 updatePlayingWorld :: World -> World
 updatePlayingWorld world =
-  let (x, y, angle, direction) = getHomelanderPosition world
+  let (x, y, angle, direction') = getHomelanderPosition world
       keys = getPressedKeys world
       currentProjectiles = projectiles world
       enemies' = getEnemies world
       stats' = stats world
+      (_, blinkTimer) = blink $ mainCharacter world
       (screenWidth, screenHeight) = screenSize
       x'
         | Char 'a' `elem` keys || Char 'A' `elem` keys = max (x - 10) (- (screenWidth/2))
@@ -83,20 +84,24 @@ updatePlayingWorld world =
         | Char 'w' `elem` keys || Char 'W' `elem` keys = min (y + 10) (screenHeight/2)
         | Char 's' `elem` keys || Char 'S' `elem` keys = max (y - 10) (- (screenHeight/2))
         | otherwise = y
-      direction'
-        | (Char 'a' `elem` keys || Char 'A' `elem` keys) && direction == -1 = 1
-        | (Char 'd' `elem` keys || Char 'D' `elem` keys) && direction == 1 = -1
-        | otherwise = direction
+      direction''
+        | (Char 'a' `elem` keys || Char 'A' `elem` keys) && direction' == -1 = 1
+        | (Char 'd' `elem` keys || Char 'D' `elem` keys) && direction' == 1 = -1
+        | otherwise = direction'
       projectile' :: Maybe Projectile
       projectile'
-        | MouseButton LeftButton `elem` keys = Just Projectile { pSprite = laser (gameSprites world), pPosition = (x', y'), pDirection = direction', pRotation = angle  }
+        | MouseButton LeftButton `elem` keys = Just Projectile { pSprite = laser (gameSprites world), pPosition = (x', y'), pDirection = direction'', pRotation = angle  }
         | otherwise = Nothing
-      updatedEnemies = removeCollidedEnemies currentProjectiles enemies'
+      (life', updatedEnemies) = handleCollisions (life stats') (mainCharacter world)  currentProjectiles enemies'
       kills' =  kills stats' + (length enemies' - length updatedEnemies)
-      -- life' = updateLifeOnCollision life' (mainCharacter world) enemies'
+      startBlink = life' < life stats'
+      updatedTimer = if startBlink then 60 else max 0 (blinkTimer - 0.5)
+      newIsBlinking = updatedTimer /= 0
+      gameState' = if life' > 0 then Playing else GameOver
   in world {
-    mainCharacter = (mainCharacter world) { position = (x', y'), rotation = angle, direction = direction' },
+    mainCharacter = (mainCharacter world) { position = (x', y'), rotation = angle, direction = direction'', blink = (newIsBlinking, updatedTimer) },
     projectiles = updateLasers currentProjectiles ++ [fromJust projectile' | isJust projectile'],
     enemies = updateEnemies updatedEnemies (gameSprites world),
-    stats = (stats world) {kills = kills'}
+    stats = (stats world) {kills = kills', life = life'},
+    gameState = gameState'
   }

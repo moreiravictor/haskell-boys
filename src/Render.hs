@@ -12,13 +12,16 @@ drawEnemies :: World -> [Picture]
 drawEnemies world = map (\enemy -> uncurry translate (ePosition enemy) (eSprite enemy)) (enemies world)
 
 drawHomelander :: World -> Picture
-drawHomelander world = parsedHomelanderPic
+drawHomelander world = finalPic
   where (x, y) = position (mainCharacter world)
         charSprite = sprite (mainCharacter world)
         orientation = direction (mainCharacter world)
         rotatedSprite = rotate (rotation (mainCharacter world)) charSprite
         scaledSprite = scale orientation 1 rotatedSprite
         parsedHomelanderPic = translate x y scaledSprite
+        finalPic
+          | (snd (blink $ mainCharacter world) /= 0) && even (floor (snd (blink $ mainCharacter world) / 4)) = Blank
+          | otherwise = parsedHomelanderPic
 
 updateEnemies :: [Enemy] -> GameSprites -> [Enemy]
 updateEnemies enemies sprites = if not (null enemies) then (removeMissedEnemies . map walk) enemies else unsafePerformIO (generateEnemies sprites 10)

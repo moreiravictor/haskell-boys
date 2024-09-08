@@ -16,7 +16,8 @@ data Homelander = Homelander
     sprite        :: Picture,
     position      :: (Float, Float),
     rotation      :: Float,
-    direction     :: Float
+    direction     :: Float,
+    blink         :: (Bool, Float)
   }
 
 data Projectile = Projectile
