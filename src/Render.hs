@@ -37,3 +37,8 @@ updateEnemies enemies sprites = if not (null enemies) then (removeMissedEnemies 
         isVisible enemy =
           let (x', y') = ePosition enemy
           in x' >= -900 && x' <= 900 && y' >= -600 && y' <= 600
+
+drawBoldText :: String -> Color -> Picture
+drawBoldText text' color' =
+  pictures [translate offsetX offsetY (color color' (text text')) | offsetX <- [-3, 0, 3], offsetY <- [-3, 0, 3]]
+

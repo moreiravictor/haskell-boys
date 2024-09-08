@@ -16,7 +16,7 @@ main = do
 
   let mainChar = Homelander (homelander sprites) (0,0) 0 (-1)
 
-  let initialWorld = World Menu 0 sprites mainChar [] [] []
+  let initialWorld = World Menu initialStats 0 sprites mainChar [] [] []
 
   play
     (InWindow "Haskell Boys" (bimap round round screenSize) screenPosition) -- Janela do jogo
@@ -53,7 +53,10 @@ drawPlayingWorld world =
       homelanderPic = drawHomelander world
       enemiesPics = drawEnemies world
       laserPics = drawLasers world
-  in pictures (backgroundPic : homelanderPic : enemiesPics ++ laserPics)
+      heartPic = heart $ gameSprites world
+      score = translate (-750) 350 $ scale 0.5 0.5 $ drawBoldText ("Kills: " ++ show (kills $ stats world)) red
+      lifes = [translate (540 + fromIntegral i * 90) 380 heartPic | i <- [0 .. life (stats world) - 1]]
+  in pictures (backgroundPic : score : homelanderPic : enemiesPics ++ laserPics ++ lifes)
 
 updateWorld :: Float -> World -> World
 updateWorld dt world = case gameState world of
@@ -70,6 +73,7 @@ updatePlayingWorld world =
       keys = getPressedKeys world
       currentProjectiles = projectiles world
       enemies' = getEnemies world
+      stats' = stats world
       (screenWidth, screenHeight) = screenSize
       x'
         | Char 'a' `elem` keys || Char 'A' `elem` keys = max (x - 10) (- (screenWidth/2))
@@ -88,8 +92,11 @@ updatePlayingWorld world =
         | MouseButton LeftButton `elem` keys = Just Projectile { pSprite = laser (gameSprites world), pPosition = (x', y'), pDirection = direction', pRotation = angle  }
         | otherwise = Nothing
       updatedEnemies = removeCollidedEnemies currentProjectiles enemies'
+      kills' =  kills stats' + (length enemies' - length updatedEnemies)
+      -- life' = updateLifeOnCollision life' (mainCharacter world) enemies'
   in world {
     mainCharacter = (mainCharacter world) { position = (x', y'), rotation = angle, direction = direction' },
     projectiles = updateLasers currentProjectiles ++ [fromJust projectile' | isJust projectile'],
-    enemies = updateEnemies updatedEnemies (gameSprites world)
+    enemies = updateEnemies updatedEnemies (gameSprites world),
+    stats = (stats world) {kills = kills'}
   }

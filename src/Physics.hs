@@ -51,3 +51,11 @@ removeCollidedEnemies projectiles' = filter (\enemy -> not (any (`collides` enem
               size = 40
           in abs (px - ex) < size && abs (py - ey) < size
 
+updateLifeOnCollision :: Int -> Homelander -> [Enemy] -> Int
+updateLifeOnCollision lf main enemies' = if any (collides main) enemies' then lf - 1 else lf
+  where collides main' enemy =
+          let (mx, my) = position main'
+              (ex, ey) = ePosition enemy
+              size = 40
+          in abs (mx - ex) < size && abs (my - ey) < size
+

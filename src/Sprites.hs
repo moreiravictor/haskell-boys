@@ -16,7 +16,8 @@ data GameSprites = GameSprites
     translucent     :: Picture,
     laser           :: Picture,
     logo            :: Picture,
-    start           :: Picture
+    start           :: Picture,
+    heart           :: Picture
   }
 
 getAllSprites :: GameSprites -> [Picture]
@@ -47,6 +48,7 @@ loadSprites = do
   maybeLogo <- loadJuicyPNG "assets/logo.png"
   maybeStart <- loadJuicyPNG "assets/start.png"
   maybeMenuBg <- loadJuicyJPG "assets/menuBg.jpg"
+  maybeHeart <- loadJuicyPNG "assets/heart.png"
 
   let mainCharacterImg = scale 3 3 $ loadImg maybeMainCharacter
   let aTrainImg = scale 3 3 $ loadImg maybeAtrain
@@ -60,6 +62,7 @@ loadSprites = do
   let logoImg = loadImg maybeLogo
   let startImg = loadImg maybeStart
   let menuBgImg = scale 2.5 2.5 $ loadImg maybeMenuBg
+  let heartImg = scale 0.3 0.3 $ loadImg maybeHeart
 
   return GameSprites
     {
@@ -74,5 +77,6 @@ loadSprites = do
       translucent = translucentImg,
       laser = laserImg,
       logo = logoImg,
-      start = startImg
+      start = startImg,
+      heart = heartImg
     }

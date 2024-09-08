@@ -64,15 +64,25 @@ generateEnemies sprites n = mapM (const generateEnemy) [1..n]
 
       return $ Enemy sprite' (x, y) 1 borderSide
 
+data GameStats = GameStats
+  {
+    kills :: Int,
+    life  :: Int
+  }
+
+initialStats :: GameStats
+initialStats = GameStats { kills = 0, life = 3 }
+
 data World = World
   {
-     gameState        :: GameState,
-     time             :: Float,
-     gameSprites      :: GameSprites,
-     mainCharacter    :: Homelander,
-     pressedKeys      :: [Key],
-     enemies          :: [Enemy],
-     projectiles      :: [Projectile]
+      gameState         :: GameState,
+      stats             :: GameStats,
+      time              :: Float,
+      gameSprites       :: GameSprites,
+      mainCharacter     :: Homelander,
+      pressedKeys       :: [Key],
+      enemies           :: [Enemy],
+      projectiles       :: [Projectile]
   }
 
 getEnemies :: World -> [Enemy]
