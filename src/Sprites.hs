@@ -7,6 +7,7 @@ data GameSprites = GameSprites
   {
     background      :: Picture,
     menuBackground  :: Picture,
+    loseBackground  :: Picture,
     homelander      :: Picture,
     aTrain          :: Picture,
     blackNoir       :: Picture,
@@ -17,7 +18,9 @@ data GameSprites = GameSprites
     laser           :: Picture,
     logo            :: Picture,
     start           :: Picture,
-    heart           :: Picture
+    heart           :: Picture,
+    loseTitle       :: Picture,
+    loseSubtitle    :: Picture
   }
 
 getAllSprites :: GameSprites -> [Picture]
@@ -49,6 +52,9 @@ loadSprites = do
   maybeStart <- loadJuicyPNG "assets/start.png"
   maybeMenuBg <- loadJuicyJPG "assets/menuBg.jpg"
   maybeHeart <- loadJuicyPNG "assets/heart.png"
+  maybeLoseTitle <- loadJuicyPNG "assets/lose.png"
+  maybeLoseSubtitle <- loadJuicyPNG "assets/loseCommands.png"
+  maybeLoseBg <- loadJuicyPNG "assets/bgLose.png"
 
   let mainCharacterImg = scale 3 3 $ loadImg maybeMainCharacter
   let aTrainImg = scale 3 3 $ loadImg maybeAtrain
@@ -63,11 +69,15 @@ loadSprites = do
   let startImg = loadImg maybeStart
   let menuBgImg = scale 2.5 2.5 $ loadImg maybeMenuBg
   let heartImg = scale 0.3 0.3 $ loadImg maybeHeart
+  let loseTitleImg = scale 1 1 $ loadImg maybeLoseTitle
+  let loseSubtitleImg = scale 1 1 $ loadImg maybeLoseSubtitle
+  let loseBgImg = scale 1 1 $ loadImg maybeLoseBg
 
   return GameSprites
     {
       background = bg,
       menuBackground = menuBgImg,
+      loseBackground = loseBgImg,
       homelander = mainCharacterImg,
       aTrain = aTrainImg,
       blackNoir = blackNoirImg,
@@ -78,5 +88,7 @@ loadSprites = do
       laser = laserImg,
       logo = logoImg,
       start = startImg,
-      heart = heartImg
+      heart = heartImg,
+      loseTitle = loseTitleImg,
+      loseSubtitle = loseSubtitleImg
     }

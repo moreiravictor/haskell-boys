@@ -2,6 +2,7 @@ module Physics where
 
 import Models
 import Graphics.Gloss.Interface.Pure.Game
+import Sprites (GameSprites(homelander))
 
 handleInput :: Event -> World -> World
 handleInput (EventKey (Char key) Down _ _) world = addPressedKey (Char key) world
@@ -12,7 +13,9 @@ handleInput (EventKey (MouseButton LeftButton) Up _ _) world = removePressedKey 
 handleInput (EventKey (SpecialKey KeyEnter) Down _ _) world =
   case gameState world of
     Menu -> world { gameState = Playing }
-    GameOver -> world { gameState = Menu, enemies = [], projectiles = [] }
+    GameOver ->
+      let mainChar = Homelander (homelander $ gameSprites world)  (0,0) 0 (-1) (False, 0)
+      in World Playing initialStats 0 (gameSprites world) mainChar [] [] []
 handleInput _ world = world
 
 updateRotationWithMouse :: (Float, Float) -> World -> World

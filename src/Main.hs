@@ -32,7 +32,7 @@ drawWorld world =
   case gameState world of
     Menu      -> drawMenu world
     Playing   -> drawPlayingWorld world
-    GameOver  -> drawGameOver
+    GameOver  -> drawGameOver world
 
 drawMenu :: World -> Picture
 drawMenu world =
@@ -44,8 +44,15 @@ drawMenu world =
       bg = menuBackground (gameSprites world)
   in pictures [bg, logo', start']
 
-drawGameOver :: Picture
-drawGameOver = translate (-300) 0 $ scale 0.3 0.3 $ text "GAME OVER!"
+drawGameOver :: World -> Picture
+drawGameOver world =
+  let
+    logoVerticalOffset = 5 * sin (4 * time world)
+    bg = loseBackground $ gameSprites world
+    logo' = translate 0 (100 + logoVerticalOffset) $ loseTitle $ gameSprites world
+    scaleFactor = 0.6 + 0.2 * sin (2.5 * time world)
+    lose' = translate (-20) (-220) $ scale scaleFactor scaleFactor $ loseSubtitle (gameSprites world)
+  in pictures [bg, logo', lose']
 
 drawPlayingWorld :: World -> Picture
 drawPlayingWorld world =
@@ -62,10 +69,13 @@ updateWorld :: Float -> World -> World
 updateWorld dt world = case gameState world of
             Playing -> updatePlayingWorld world
             Menu -> updateMenuWorld dt world
-            GameOver -> updatePlayingWorld world
+            GameOver -> updateLoseWorld dt world
 
 updateMenuWorld :: Float -> World -> World
 updateMenuWorld dt world = world { time = time world + dt }
+
+updateLoseWorld :: Float -> World -> World
+updateLoseWorld dt world = world { time = time world + dt }
 
 updatePlayingWorld :: World -> World
 updatePlayingWorld world =
