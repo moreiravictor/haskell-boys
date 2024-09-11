@@ -52,16 +52,16 @@ generateEnemies sprites n = mapM (const generateEnemy) [1..n]
       (x, y) <- case borderSide of
         1 -> do -- Top border
           xPos <- randomRIO (-halfWidth, halfWidth)
-          return (xPos, halfHeight + 100)  -- Slightly outside the top
+          return (xPos, halfHeight + 100)  -- above the top
         2 -> do -- Bottom border
           xPos <- randomRIO (-halfWidth, halfWidth)
-          return (xPos, -(halfHeight + 100))  -- Slightly outside the bottom
+          return (xPos, -(halfHeight + 100))  -- below the bottom
         3 -> do -- Left border
           yPos <- randomRIO (-halfHeight, halfHeight)
-          return (-(halfWidth + 100), yPos)  -- Slightly outside the left
+          return (-(halfWidth + 100), yPos)  -- outside the left
         _ -> do -- Right border
           yPos <- randomRIO (-halfHeight, halfHeight)
-          return (halfWidth + 100, yPos)  -- Slightly outside the right
+          return (halfWidth + 100, yPos)  -- outside the right
 
       return $ Enemy sprite' (x, y) 1 borderSide
 
@@ -83,6 +83,7 @@ data World = World
       mainCharacter     :: Homelander,
       pressedKeys       :: [Key],
       enemies           :: [Enemy],
+      enemiesAmount     :: Int,
       projectiles       :: [Projectile]
   }
 
@@ -114,4 +115,4 @@ removePressedKey key world = world { pressedKeys = filter (/= key) (pressedKeys 
 getPressedKeys :: World -> [Key]
 getPressedKeys = pressedKeys
 
-data GameState = Menu | Playing | GameOver
+data GameState = Menu | Stage1 | Stage2 | Stage3 | GameOver | Win

@@ -12,19 +12,20 @@ handleInput (EventKey (MouseButton LeftButton) Down _ _) world = addPressedKey  
 handleInput (EventKey (MouseButton LeftButton) Up _ _) world = removePressedKey  (MouseButton LeftButton) world
 handleInput (EventKey (SpecialKey KeyEnter) Down _ _) world =
   case gameState world of
-    Menu -> world { gameState = Playing }
+    Menu -> world { gameState = Stage1 }
     GameOver ->
       let mainChar = Homelander (homelander $ gameSprites world)  (0,0) 0 (-1) (False, 0)
-      in World Playing initialStats 0 (gameSprites world) mainChar [] [] []
+      in World Stage1 initialStats 0 (gameSprites world) mainChar [] [] 10 []
+    _ -> world
 handleInput _ world = world
 
 updateRotationWithMouse :: (Float, Float) -> World -> World
 updateRotationWithMouse (mouseX, mouseY) world =
-  let (charX, charY, _, direction) = getHomelanderPosition world
+  let (charX, charY, _, direction') = getHomelanderPosition world
       deltaX = mouseX - charX
       deltaY = mouseY - charY
       angle = atan2 deltaY deltaX * 180 / pi  -- Convert from radians to degrees
-      normalizedAngle = if direction == -1 then angle-20 else - (angle + 180)
+      normalizedAngle = if direction' == -1 then angle-20 else - (angle + 180)
   in world { mainCharacter = (mainCharacter world) { rotation = normalizedAngle } }
 
 updateLasers :: [Projectile] -> [Projectile]
@@ -54,8 +55,8 @@ handleCollisions life' homelander' projectiles' = foldr checkCollision (life', [
           (ex, ey) = ePosition enemy
           size = 40
       in abs (px - ex) < size && abs (py - ey) < size
-    homelanderCollides homelander enemy =
-      let (hx, hy) = position homelander
+    homelanderCollides homelander'' enemy =
+      let (hx, hy) = position homelander''
           (ex, ey) = ePosition enemy
           size = 80
       in abs (hx - ex) < size && abs (hy - ey) < size

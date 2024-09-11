@@ -23,8 +23,8 @@ drawHomelander world = finalPic
           | (snd (blink $ mainCharacter world) /= 0) && even (floor (snd (blink $ mainCharacter world) / 4)) = Blank
           | otherwise = parsedHomelanderPic
 
-updateEnemies :: [Enemy] -> GameSprites -> [Enemy]
-updateEnemies enemies sprites = if not (null enemies) then (removeMissedEnemies . map walk) enemies else unsafePerformIO (generateEnemies sprites 10)
+updateEnemies :: [Enemy] -> GameSprites -> Int -> [Enemy]
+updateEnemies enemies' sprites enemiesAmount' = if not (null enemies') then (removeMissedEnemies . map walk) enemies' else unsafePerformIO (generateEnemies sprites enemiesAmount')
   where
     walk enemy =
       let (initialX, initialY) = ePosition enemy
