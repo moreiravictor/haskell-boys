@@ -15,7 +15,7 @@ handleInput (EventKey (SpecialKey KeyEnter) Down _ _) world =
     Menu -> world { gameState = Stage1 }
     GameOver ->
       let mainChar = Homelander (homelander $ gameSprites world)  (0,0) 0 (-1) (False, 0)
-      in World Stage1 initialStats 0 (gameSprites world) mainChar [] [] 10 []
+      in World Stage1 initialStats 0 (gameSprites world) mainChar [] [] stage1EnemiesAmount []
     _ -> world
 handleInput _ world = world
 
@@ -24,10 +24,11 @@ updateRotationWithMouse (mouseX, mouseY) world =
   let (charX, charY, _, direction') = getHomelanderPosition world
       deltaX = mouseX - charX
       deltaY = mouseY - charY
-      angle = atan2 deltaY deltaX * 180 / pi  -- Convert from radians to degrees
+      angle = atan2 deltaY deltaX * 180 / pi
       normalizedAngle = if direction' == -1 then angle-20 else - (angle + 180)
   in world { mainCharacter = (mainCharacter world) { rotation = normalizedAngle } }
 
+-- Funcion that deals with laser movement
 updateLasers :: [Projectile] -> [Projectile]
 updateLasers = removeMissedLasers . map walk
   where

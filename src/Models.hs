@@ -2,14 +2,14 @@ module Models where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
-import System.Random (randomRIO)
 import Sprites
+import Control.Monad.State
 
 screenSize :: (Float, Float)
 screenSize = (1600, 900)
 
 screenPosition :: (Int, Int)
-screenPosition = (5000, 600)
+screenPosition = (800, 600)
 
 data Homelander = Homelander
   {
@@ -36,35 +36,6 @@ data Enemy = Enemy
     eInitialBorder :: Int
   }
 
-generateEnemies :: GameSprites -> Int -> IO [Enemy]
-generateEnemies sprites n = mapM (const generateEnemy) [1..n]
-  where
-    generateEnemy = do
-      let (width, height) = screenSize
-      let halfWidth = width / 2
-      let halfHeight = height / 2
-
-      let spritesArr   = getAllSprites sprites
-      randomSpriteIndex <- randomRIO (0, length spritesArr - 1)
-      let sprite' = spritesArr !! randomSpriteIndex
-
-      borderSide <- randomRIO (1 :: Int, 4)
-      (x, y) <- case borderSide of
-        1 -> do -- Top border
-          xPos <- randomRIO (-halfWidth, halfWidth)
-          return (xPos, halfHeight + 100)  -- above the top
-        2 -> do -- Bottom border
-          xPos <- randomRIO (-halfWidth, halfWidth)
-          return (xPos, -(halfHeight + 100))  -- below the bottom
-        3 -> do -- Left border
-          yPos <- randomRIO (-halfHeight, halfHeight)
-          return (-(halfWidth + 100), yPos)  -- outside the left
-        _ -> do -- Right border
-          yPos <- randomRIO (-halfHeight, halfHeight)
-          return (halfWidth + 100, yPos)  -- outside the right
-
-      return $ Enemy sprite' (x, y) 1 borderSide
-
 data GameStats = GameStats
   {
     kills :: Int,
@@ -87,11 +58,7 @@ data World = World
       projectiles       :: [Projectile]
   }
 
-getEnemies :: World -> [Enemy]
-getEnemies = enemies
-
-getProjectiles :: World -> [Projectile]
-getProjectiles = projectiles
+type GameMonad = State World
 
 getHomelanderPosition :: World -> (Float, Float, Float, Float)
 getHomelanderPosition world =
@@ -100,19 +67,19 @@ getHomelanderPosition world =
       direction' = direction (mainCharacter world)
   in (x, y, angle, direction')
 
-setHomelanderPosition :: (Float, Float) -> World -> World
-setHomelanderPosition newPos world =
-  let oldHomelander = mainCharacter world
-      newHomelander = oldHomelander { position = newPos }
-  in world { mainCharacter = newHomelander }
-
 addPressedKey :: Key -> World -> World
 addPressedKey key world = world { pressedKeys = key : pressedKeys world }
 
 removePressedKey :: Key -> World -> World
 removePressedKey key world = world { pressedKeys = filter (/= key) (pressedKeys world) }
 
-getPressedKeys :: World -> [Key]
-getPressedKeys = pressedKeys
-
 data GameState = Menu | Stage1 | Stage2 | Stage3 | GameOver | Win
+
+stage1EnemiesAmount :: Int
+stage1EnemiesAmount = 15
+
+stage2EnemiesAmount :: Int
+stage2EnemiesAmount = 20
+
+stage3EnemiesAmount :: Int
+stage3EnemiesAmount = 25
