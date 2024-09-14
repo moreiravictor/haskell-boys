@@ -10,7 +10,7 @@ data GameSprites = GameSprites
     stage3Background  :: Picture,
     menuBackground    :: Picture,
     loseBackground    :: Picture,
-    winBackground    :: Picture,
+    winBackground     :: Picture,
     homelander        :: Picture,
     aTrain            :: Picture,
     blackNoir         :: Picture,
@@ -24,7 +24,11 @@ data GameSprites = GameSprites
     heart             :: Picture,
     loseTitle         :: Picture,
     loseSubtitle      :: Picture,
-    winTitle          :: Picture
+    winTitle          :: Picture,
+    stage1Title       :: Picture,
+    stage2Title       :: Picture,
+    stage3Title       :: Picture,
+    closeGame         :: Picture
   }
 
 getAllSprites :: GameSprites -> [Picture]
@@ -66,6 +70,10 @@ loadSprites = do
   maybeLoseTitle <- loadJuicyPNG "assets/texts/lose.png"
   maybeLoseSubtitle <- loadJuicyPNG "assets/texts/loseCommands.png"
   maybeWinTitle <- loadJuicyPNG "assets/texts/win.png"
+  maybeStage1Title <- loadJuicyPNG "assets/texts/stage1.png"
+  maybeStage2Title <- loadJuicyPNG "assets/texts/stage2.png"
+  maybeStage3Title <- loadJuicyPNG "assets/texts/stage3.png"
+  maybeCloseGameTitle <- loadJuicyPNG "assets/texts/closeGame.png"
 
   let mainCharacterImg = scale 3 3 $ loadImg maybeMainCharacter
   let aTrainImg = scale 3 3 $ loadImg maybeAtrain
@@ -91,6 +99,10 @@ loadSprites = do
   let loseTitleImg = scale 1 1 $ loadImg maybeLoseTitle
   let loseSubtitleImg = scale 1 1 $ loadImg maybeLoseSubtitle
   let winTitleImg = scale 1 1 $ loadImg maybeWinTitle
+  let stage1TitleImg = scale 1 1 $ loadImg maybeStage1Title
+  let stage2TitleImg = scale 1 1 $ loadImg maybeStage2Title
+  let stage3TitleImg = scale 1 1 $ loadImg maybeStage3Title
+  let closeGameTitleImg = scale 1 1 $ loadImg maybeCloseGameTitle
 
   return GameSprites
     {
@@ -113,5 +125,9 @@ loadSprites = do
       heart = heartImg,
       loseTitle = loseTitleImg,
       loseSubtitle = loseSubtitleImg,
-      winTitle = winTitleImg
+      winTitle = winTitleImg,
+      stage1Title = stage1TitleImg,
+      stage2Title = stage2TitleImg,
+      stage3Title = stage3TitleImg,
+      closeGame = closeGameTitleImg
     }

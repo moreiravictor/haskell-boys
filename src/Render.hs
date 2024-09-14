@@ -76,10 +76,12 @@ drawMenu world =
 drawWinWorld :: World -> Picture
 drawWinWorld world =
   let
+    sprites = gameSprites world
     logoVerticalOffset = 5 * sin (4 * time world)
     bg = winBackground $ gameSprites world
-    logo' = translate 0 (100 + logoVerticalOffset) $ winTitle $ gameSprites world
-  in pictures [bg, logo']
+    logo' = translate 0 (100 + logoVerticalOffset) $ winTitle sprites
+    closeGame' = translate (0 + logoVerticalOffset) (-350) $ closeGame sprites
+  in pictures [bg, logo', closeGame']
 
 drawGameOver :: World -> Picture
 drawGameOver world =
@@ -93,18 +95,21 @@ drawGameOver world =
 
 drawPlayingWorld :: World -> Picture
 drawPlayingWorld world =
-  let backgroundPic = case gameState world of
-        Stage1 -> stage1Background (gameSprites world)
-        Stage2 -> stage2Background (gameSprites world)
-        Stage3 -> stage3Background (gameSprites world)
-        _ -> Blank
+  let sprites = gameSprites world
+      (backgroundPic, stageTitle) = case gameState world of
+        Stage1 -> (stage1Background sprites, stage1Title sprites)
+        Stage2 -> (stage2Background sprites, stage2Title sprites)
+        Stage3 -> (stage3Background sprites, stage3Title sprites)
+        _ -> (Blank, Blank)
+      verticalOffset = 5 * sin (4 * time world)
+      stageTitle' = translate 0 (100 + verticalOffset) stageTitle
       homelanderPic = drawHomelander world
       enemiesPics = drawEnemies world
       laserPics = drawLasers world
       heartPic = heart $ gameSprites world
       score = translate (-750) 350 $ scale 0.5 0.5 $ drawBoldText ("Kills: " ++ show (kills $ stats world)) red
       lifes = [translate (540 + fromIntegral i * 90) 380 heartPic | i <- [0 .. life (stats world) - 1]]
-  in pictures (backgroundPic : score : homelanderPic : enemiesPics ++ laserPics ++ lifes)
+  in pictures (backgroundPic : stageTitle' : score : homelanderPic : enemiesPics ++ laserPics ++ lifes)
 
 -- Below are functions used to update elements on playing world
 moveElements :: GameMonad ()
@@ -178,9 +183,9 @@ updateWorld :: Float -> GameMonad ()
 updateWorld dt = do
       currentGameState <- gets gameState
       case currentGameState of
-          Stage1   -> updatePlayingWorld
-          Stage2   -> updatePlayingWorld
-          Stage3   -> updatePlayingWorld
+          Stage1   -> updatePlayingWorld dt
+          Stage2   -> updatePlayingWorld dt
+          Stage3   -> updatePlayingWorld dt
           Menu     -> updateStaticWorld dt
           Win      -> updateStaticWorld dt
           GameOver -> updateStaticWorld dt
@@ -189,11 +194,13 @@ updateStaticWorld :: Float -> GameMonad ()
 updateStaticWorld dt = do
   modify (\world -> world { time = time world + dt })
 
-updatePlayingWorld :: GameMonad ()
-updatePlayingWorld = do
+updatePlayingWorld :: Float -> GameMonad ()
+updatePlayingWorld dt = do
       moveElements
       updateCollisions
       updateStage
+      modify (\world -> world { time = time world + dt })
+
 
 -- Function used to generate enemies randomly on border of game screen so that they do not just appear on screen but walk into it
 generateEnemies :: GameSprites -> Int -> IO [Enemy]

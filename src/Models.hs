@@ -9,7 +9,7 @@ screenSize :: (Float, Float)
 screenSize = (1600, 900)
 
 screenPosition :: (Int, Int)
-screenPosition = (800, 600)
+screenPosition = (0, 0)
 
 data Homelander = Homelander
   {
